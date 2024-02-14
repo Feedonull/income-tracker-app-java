@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -26,7 +27,7 @@ public class Income {
     private Long currencyId;
     private Long sourceId;
     private Long methodId;
-    private Date date;
+    private LocalDateTime createdAt;
     private String location;
 
 }

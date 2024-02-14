@@ -1,7 +1,11 @@
 package com.incometracker.incomeservice.controller;
 
 import com.incometracker.incomeservice.dto.ApiResponse;
+import com.incometracker.incomeservice.dto.IncomeDto;
+import com.incometracker.incomeservice.model.Currency;
 import com.incometracker.incomeservice.model.Income;
+import com.incometracker.incomeservice.model.Method;
+import com.incometracker.incomeservice.model.Source;
 import com.incometracker.incomeservice.service.IncomeService;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
@@ -11,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,8 +32,7 @@ public class IncomeController {
     public ResponseEntity<ApiResponse> add(@RequestBody Income income){
 
         logger.info("Adding new income");
-
-
+            income.setCreatedAt(LocalDateTime.now());
             Income result = incomeService.add(income);
             URI location = ServletUriComponentsBuilder
                     .fromCurrentContextPath().path("/api/v1/income/add")
@@ -54,8 +58,24 @@ public class IncomeController {
 
         Optional<Income> income = incomeService.findById(id);
         if(income.isPresent()){
+            IncomeDto incomeDto = new IncomeDto();
+            incomeDto.setId(income.get().getId());
+            incomeDto.setAmount(income.get().getAmount());
+            incomeDto.setUserId(income.get().getUserId());
+            incomeDto.setLocation(income.get().getLocation());
+            incomeDto.setCreatedAt(income.get().getCreatedAt());
+
+            Currency currency = incomeService.getIncomeCurrency(income.get().getCurrencyId());
+            incomeDto.setCurrency(currency);
+
+            Source source = incomeService.getIncomeSource(income.get().getSourceId());
+            incomeDto.setSource(source);
+
+            Method method = incomeService.getIncomeMethod(income.get().getMethodId());
+            incomeDto.setMethod(method);
+
             return ResponseEntity.ok()
-                    .body(new ApiResponse(true, "Income retrieved successfully", income));
+                    .body(new ApiResponse(true, "Income retrieved successfully", incomeDto));
         }else{
             return ResponseEntity.ok()
                     .body(new ApiResponse(true, "No income with id: "+id+" found", null));

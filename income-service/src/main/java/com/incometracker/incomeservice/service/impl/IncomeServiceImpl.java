@@ -1,6 +1,16 @@
 package com.incometracker.incomeservice.service.impl;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.incometracker.incomeservice.client.CurrencyClient;
+import com.incometracker.incomeservice.client.MethodClient;
+import com.incometracker.incomeservice.client.SourceClient;
+import com.incometracker.incomeservice.dto.ApiResponse;
+import com.incometracker.incomeservice.dto.IncomeDto;
+import com.incometracker.incomeservice.model.Currency;
 import com.incometracker.incomeservice.model.Income;
+import com.incometracker.incomeservice.model.Method;
+import com.incometracker.incomeservice.model.Source;
 import com.incometracker.incomeservice.repository.IncomeRepository;
 import com.incometracker.incomeservice.service.IncomeService;
 import jakarta.ws.rs.NotFoundException;
@@ -15,6 +25,9 @@ import java.util.Optional;
 public class IncomeServiceImpl implements IncomeService {
 
     private final IncomeRepository incomeRepository;
+    private CurrencyClient currencyClient;
+    private SourceClient sourceClient;
+    private MethodClient methodClient;
     @Override
     public Income add(Income income) {
         return incomeRepository.save(income);
@@ -27,7 +40,8 @@ public class IncomeServiceImpl implements IncomeService {
 
     @Override
     public Optional<Income> findById(Long id) {
-        return incomeRepository.findById(id);
+        Optional<Income> income = incomeRepository.findById(id);
+        return income;
     }
 
     @Override
@@ -38,6 +52,30 @@ public class IncomeServiceImpl implements IncomeService {
             throw new NotFoundException("Entry not registered to be updated, register source first");
         }
         return income;
+    }
+
+    @Override
+    public Currency getIncomeCurrency(Long id) {
+        ApiResponse apiResponse = currencyClient.findById(id).getBody();
+        ObjectMapper mapper = new ObjectMapper();
+        Currency currency = mapper.convertValue(apiResponse.getData(), Currency.class);
+        return currency;
+    }
+
+    @Override
+    public Source getIncomeSource(Long id) {
+        ApiResponse apiResponse = sourceClient.findById(id).getBody();
+        ObjectMapper mapper = new ObjectMapper();
+        Source source = mapper.convertValue(apiResponse.getData(), Source.class);
+        return source;
+    }
+
+    @Override
+    public Method getIncomeMethod(Long id) {
+        ApiResponse apiResponse = methodClient.findById(id).getBody();
+        ObjectMapper mapper = new ObjectMapper();
+        Method method = mapper.convertValue(apiResponse.getData(), Method.class);
+        return method;
     }
 
     @Override

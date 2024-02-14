@@ -1,0 +1,37 @@
+server:
+  port: 8089
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+
+spring:
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lowerCaseServiceId: true
+      routes:
+        - id: income-service
+          uri: lb://INCOME-SERVICE/
+          predicates:
+            - Path=/api/v1/income/**
+        - id: income-source-service
+          uri: lb://INCOME-SOURCE-SERVICE/
+          predicates:
+            - Path=/api/v1/source/**
+        - id: method-service
+          uri: lb://METHOD-SERVICE/
+          predicates:
+            - Path=/api/v1/method/**
+        - id: currency-service
+          uri: lb://CURRENCY-SERVICE/
+          predicates:
+            - Path=/api/v1/currency/**
